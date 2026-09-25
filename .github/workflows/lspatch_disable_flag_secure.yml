@@ -55,15 +55,14 @@ jobs:
 
           BASENAME="patched"
 
-          wget -O lspatch.jar "https://github.com/JingMatrix/LSPatch/releases/download/v0.5.1/lspatch.jar"
+          # Download LSPatch core jar
+          wget -O lspatch.jar "https://github.com/LSPosed/LSPatch/releases/download/v0.5.1/lspatch.jar"
 
-          MODULE_URL=$(curl -s https://api.github.com/repos/Xposed-Modules-Repo/com.varuns2002.disable_flag_secure/releases/latest | jq -r '.assets[] | select(.name | test("^Xposed-Disable-FLAG_SECURE_.*\\.apk$")) | .browser_download_url')
-          echo "MODULE_URL=$MODULE_URL"
-          wget -O Xposed-Disable-FLAG_SECURE.apk "$MODULE_URL"
+          # Download Disable FLAG_SECURE module directly
+          wget -O Xposed-Disable-FLAG_SECURE.apk "https://github.com/Xposed-Modules-Repo/com.varuns2002.disable_flag_secure/releases/download/v1.0.1/app-release.apk"
 
-          APKEEP_URL=$(curl -s https://api.github.com/repos/EFForg/apkeep/releases/latest | jq -r '.assets[] | select(.name=="apkeep-x86_64-unknown-linux-gnu") | .browser_download_url')
-          echo "APKEEP_URL=$APKEEP_URL"
-          wget -O apkeep "$APKEEP_URL"
+          # Download apkeep directly
+          wget -O apkeep "https://github.com/EFForg/apkeep/releases/download/0.13.0/apkeep-x86_64-unknown-linux-gnu"
 
           chmod +x apkeep
           mkdir -p apk_download
@@ -97,11 +96,9 @@ jobs:
             exit 1
           fi
 
+          # Merge split APKS or convert to standard APK if needed
           if ! file apk_download/* | grep -q "Android package (APK)"; then
-            APKEDITOR_URL=$(curl -s https://api.github.com/repos/REAndroid/APKEditor/releases/latest | jq -r '.assets[] | select(.name | test("^APKEditor-.*\\.jar$")) | .browser_download_url')
-            echo "APKEDITOR_URL=$APKEDITOR_URL"
-            wget -O APKEditor.jar "$APKEDITOR_URL"
-
+            wget -O APKEditor.jar "https://github.com/REAndroid/APKEditor/releases/download/V1.4.1/APKEditor-1.4.1.jar"
             java -jar APKEditor.jar m -i apk_download/* -o main.apk
           else
             cp apk_download/* main.apk
@@ -109,7 +106,7 @@ jobs:
 
           ls -la
 
-          mkdir -p lspatch
+          mkdir -p lspatch_tmp
 
           INJECT_FLAG=""
           if [ "${{ github.event.inputs.injectdex }}" = "true" ]; then
@@ -120,16 +117,15 @@ jobs:
             -l ${{ github.event.inputs.signture_bypass }} \
             -m Xposed-Disable-FLAG_SECURE.apk \
             $INJECT_FLAG \
-            -o lspatch main.apk
+            -o lspatch_tmp main.apk
 
-          ls -la lspatch
+          ls -la lspatch_tmp
 
           mkdir -p output
-
-          mv lspatch/* "lspatch/${BASENAME}.apk"
+          mv lspatch_tmp/*.apk "output/${BASENAME}-patched.apk"
 
       - name: Upload patched APK
         uses: actions/upload-artifact@v4
         with:
           name: patched-apk
-          path: "lspatch/*"
+          path: "output/*"
