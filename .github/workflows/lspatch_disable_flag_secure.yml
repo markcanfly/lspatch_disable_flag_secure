@@ -59,7 +59,8 @@ jobs:
           wget -O lspatch.jar "https://github.com/LSPosed/LSPatch/releases/download/v0.5.1/lspatch.jar"
 
           # Download Disable FLAG_SECURE module directly
-          wget -O Xposed-Disable-FLAG_SECURE.apk "https://github.com/Xposed-Modules-Repo/com.varuns2002.disable_flag_secure/releases/download/v1.0.1/app-release.apk"
+          MODULE_URL=$(curl -s https://api.github.com/repos/Xposed-Modules-Repo/com.varuns2002.disable_flag_secure/releases/latest | jq -r '.assets[] | select(.name | test("^Xposed-Disable-FLAG_SECURE_.*\\.apk$")) | .browser_download_url')
+          wget -O Xposed-Disable-FLAG_SECURE.apk "$MODULE_URL"
 
           # Download apkeep directly
           wget -O apkeep "https://github.com/EFForg/apkeep/releases/download/0.13.0/apkeep-x86_64-unknown-linux-gnu"
