@@ -55,7 +55,7 @@ jobs:
 
           BASENAME="patched"
 
-          wget -O lspatch.jar "https://github.com/JingMatrix/LSPatch/releases/latest/download/lspatch.jar"
+          wget -O lspatch.jar "https://github.com/JingMatrix/LSPatch/releases/download/v0.5.1/lspatch.jar"
 
           MODULE_URL=$(curl -s https://api.github.com/repos/Xposed-Modules-Repo/com.varuns2002.disable_flag_secure/releases/latest | jq -r '.assets[] | select(.name | test("^Xposed-Disable-FLAG_SECURE_.*\\.apk$")) | .browser_download_url')
           echo "MODULE_URL=$MODULE_URL"
